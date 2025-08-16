@@ -1,7 +1,7 @@
 {
-  "name": "roblox-proxy-moderno",
+  "name": "roblox-proxy",
   "version": "1.0.0",
-  "description": "Proxy per Roblox con ES Modules",
+  "description": "Proxy per Roblox",
   "main": "server.js",
   "type": "module",
   "scripts": {
