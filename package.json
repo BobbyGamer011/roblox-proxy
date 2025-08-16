@@ -1,13 +1,17 @@
 {
-  "name": "roblox-proxy",
+  "name": "roblox-proxy-moderno",
   "version": "1.0.0",
-  "description": "Proxy for Roblox game",
+  "description": "Proxy per Roblox con ES Modules",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "axios": "*",
-    "express": "*"
+    "axios": "^1.7.2",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
