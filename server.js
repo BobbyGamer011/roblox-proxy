@@ -4,31 +4,54 @@ import axios from 'axios';
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.get('/get-roblox-creations', async (req, res) => {
+// Carica le credenziali di Webshare dalle variabili d'ambiente
+const webshareIp = process.env.WEBSHARE_IP;
+const websharePort = process.env.WEBSHARE_PORT;
+const webshareUsername = process.env.WEBSHARE_USERNAME;
+const websharePassword = process.env.WEBSHARE_PASSWORD;
+
+// Controlla se le variabili sono caricate
+if (!webshareIp || !websharePort || !webshareUsername || !websharePassword) {
+  console.error("ERRORE CRITICO: Una o più variabili d'ambiente di Webshare non sono definite.");
+}
+
+const proxyConfig = {
+  host: webshareIp,
+  port: websharePort,
+  auth: {
+    username: webshareUsername,
+    password: websharePassword,
+  },
+};
+
+app.get('/getGames', async (req, res) => {
   const userId = req.query.userId;
   if (!userId) {
-    return res.status(400).json({ error: 'Il parametro "userId" è richiesto.' });
+    return res.status(400).json({ error: "Il parametro userId è richiesto" });
   }
-
-  // Nota: Questo endpoint API che stai usando è per gli oggetti del catalogo,
-  // non per i "game pass". Se vuoi i game pass, dobbiamo usare gli URL precedenti.
-  const robloxApiUrl = `https://catalog.roblox.com/v1/search/items/details?Category=3&Subcategory=12&CreatorTargetId=${userId}&Limit=30&SortOrder=PriceAsc`;
-  
-  console.log(`Richiesta per userId: ${userId}`);
-
+  const url = `https://games.roblox.com/v2/users/${userId}/games?sortOrder=Asc&limit=50`;
   try {
-    const response = await axios.get(robloxApiUrl);
+    const response = await axios.get(url, { proxy: proxyConfig });
     res.json(response.data);
   } catch (error) {
-    console.error("Errore durante la chiamata API:", error.message);
-    res.status(500).json({ error: 'Impossibile contattare le API di Roblox.' });
+    res.status(500).json({ error: "Errore nel contattare le API di Roblox tramite il proxy." });
   }
 });
 
-app.get('/', (req, res) => {
-  res.send('Proxy server is running!');
+app.get('/getGamePasses', async (req, res) => {
+  const universeId = req.query.universeId;
+  if (!universeId) {
+    return res.status(400).json({ error: "Il parametro universeId è richiesto" });
+  }
+  const url = `https://games.roblox.com/v1/games/${universeId}/game-passes?sortOrder=Asc&limit=100`;
+  try {
+    const response = await axios.get(url, { proxy: proxyConfig });
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: "Errore nel contattare le API di Roblox tramite il proxy." });
+  }
 });
 
 app.listen(port, () => {
-  console.log(`Proxy server in ascolto sulla porta ${port}`);
+  console.log(`Proxy in ascolto sulla porta ${port}`);
 });
