@@ -1,26 +1,47 @@
-const express = require('express');
-const axios = require('axios');
+const express = require("express");
+const axios = require("axios");
 const app = express();
+const port = process.env.PORT || 3000;
 
-app.get('/get-roblox-creations', async (req, res) => {
+// Carica le credenziali di Webshare dalle variabili d'ambiente
+const webshareIp = process.env.WEBSHARE_IP;
+const websharePort = process.env.WEBSHARE_PORT;
+const webshareUsername = process.env.WEBSHARE_USERNAME;
+const websharePassword = process.env.WEBSHARE_PASSWORD;
+
+const proxyConfig = {
+  host: webshareIp,
+  port: websharePort,
+  auth: {
+    username: webshareUsername,
+    password: websharePassword,
+  },
+};
+
+app.get("/getGames", async (req, res) => {
   const userId = req.query.userId;
-  if (!userId) {
-    return res.status(400).json({ error: 'Il parametro "userId" è richiesto.' });
-  }
-  const robloxApiUrl = `https://catalog.roblox.com/v1/search/items/details?Category=3&Subcategory=12&CreatorTargetId=${userId}&Limit=30&SortOrder=PriceAsc`;
-  console.log(`Richiesta per userId: ${userId}`);
+  if (!userId) return res.status(400).json({ error: "userId richiesto" });
+  const url = `https://games.roblox.com/v2/users/${userId}/games?sortOrder=Asc&limit=50`;
   try {
-    const response = await axios.get(robloxApiUrl);
+    const response = await axios.get(url, { proxy: proxyConfig });
     res.json(response.data);
   } catch (error) {
-    res.status(500).json({ error: 'Impossibile contattare le API di Roblox.' });
+    res.status(500).json({ error: "Errore nel contattare le API di Roblox via proxy." });
   }
 });
 
-app.get('/', (req, res) => {
-  res.send('Proxy server is running!');
+app.get("/getGamePasses", async (req, res) => {
+    const universeId = req.query.universeId;
+    if (!universeId) return res.status(400).json({ error: "universeId richiesto" });
+    const url = `https://games.roblox.com/v1/games/${universeId}/game-passes?sortOrder=Asc&limit=100`;
+    try {
+        const response = await axios.get(url, { proxy: proxyConfig });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: "Errore nel contattare le API di Roblox via proxy." });
+    }
 });
 
-const listener = app.listen(process.env.PORT || 3000, () => {
-  console.log('Proxy server in ascolto sulla porta ' + listener.address().port);
+app.listen(port, () => {
+  console.log(`Proxy in ascolto sulla porta ${port}`);
 });
