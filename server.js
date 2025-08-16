@@ -10,9 +10,10 @@ const websharePort = process.env.WEBSHARE_PORT;
 const webshareUsername = process.env.WEBSHARE_USERNAME;
 const websharePassword = process.env.WEBSHARE_PASSWORD;
 
-// Controlla se le variabili sono caricate
+// Controlla se le variabili sono caricate correttamente all'avvio
 if (!webshareIp || !websharePort || !webshareUsername || !websharePassword) {
-  console.error("ERRORE CRITICO: Una o più variabili d'ambiente di Webshare non sono definite.");
+  console.error("ERRORE CRITICO: Una o più variabili d'ambiente di Webshare non sono definite. Il server non può partire.");
+  // Se una variabile manca, il server non si avvierà correttamente, causando un errore 502.
 }
 
 const proxyConfig = {
